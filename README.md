@@ -56,6 +56,6 @@ cluster_stats_messages_received:136
 ```
 
 ## 參考資料
-https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
-https://blog.yowko.com/docker-compose-redis-cluster/
-https://www.yoyoask.com/?p=6051
+1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
+2. https://blog.yowko.com/docker-compose-redis-cluster/
+3. https://www.yoyoask.com/?p=6051
