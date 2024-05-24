@@ -22,6 +22,8 @@ requirepass 「自行設定的 redis 資料庫密碼」
 ```shell
 ip=「你的設備 IP」
 REDIS_PASSWORD=「自行設定的 redis 資料庫密碼，要與 rediscluster.conf 一致」
+STREAM_NAME= 「用來交換訊息的 stream name」
+CUSTOMER_GROUPNAME=「customer 的 group name」
 ```
 
 ### 啟動 Redis Cluster
@@ -59,3 +61,4 @@ cluster_stats_messages_received:136
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
 2. https://blog.yowko.com/docker-compose-redis-cluster/
 3. https://www.yoyoask.com/?p=6051
+4. https://blog.csdn.net/weixin_43798031/article/details/131322622
