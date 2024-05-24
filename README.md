@@ -1,5 +1,81 @@
 # Redis-Cluster-Stress-Testing
+## Redis Cluster Environment Setup
+The project directory will be organized as follows:
+![Project Directory](readme_img/image.png)
+### Create `rediscluster.conf` File in the Redis Directory
+
+Example configuration:
+
+```shell
+# IP
+bind 0.0.0.0
+# Enable cluster
+cluster-enabled yes
+# Specify cluster config file
+cluster-config-file nodes.conf
+# Specify node timeout
+cluster-node-timeout 5000
+# Set master connection password
+masterauth "your_redis_password"
+# Set replica connection password
+requirepass "your_redis_password"
+```
+
+### Create .env File in the Project Root Directory
+Example configuration:
+```shell
+ip="your_device_ip"
+REDIS_PASSWORD="your_redis_password"  # Must match the password in rediscluster.conf
+STREAM_NAME="your_stream_name"
+CUSTOMER_GROUPNAME="your_customer_groupname"
+```
+
+### Start Redis Cluster
+```shell
+docker-compose up -d --build
+```
+### Check if Redis Cluster is Running Properly
+```shell
+redis-cli -a "your_redis_password" -p 7000 cluster info
+```
+
+If the output is similar to the following, the Redis Cluster is operating correctly:
+```
+cluster_state:ok
+cluster_slots_assigned:16384
+cluster_slots_ok:16384
+cluster_slots_pfail:0
+cluster_slots_fail:0
+cluster_known_nodes:6
+cluster_size:3
+cluster_current_epoch:6
+cluster_my_epoch:2
+cluster_stats_messages_ping_sent:63
+cluster_stats_messages_pong_sent:69
+cluster_stats_messages_meet_sent:4
+cluster_stats_messages_sent:136
+cluster_stats_messages_ping_received:68
+cluster_stats_messages_pong_received:67
+cluster_stats_messages_meet_received:1
+cluster_stats_messages_received:136
+```
+
+## Run the Producer-Consumer Model
+* Run `main.go` directly in the project directory
+
+If you see log information similar to the following output, the program has run successfully:
+![Log Output](readme_img/image1.png)
+
+## References
+1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
+2. https://blog.yowko.com/docker-compose-redis-cluster/
+3. https://www.yoyoask.com/?p=6051
+4. https://blog.csdn.net/weixin_43798031/article/details/131322622
+
+# Redis-Cluster-Stress-Testing
 ## Redis cluster 環境配置
+專案目錄將會如下
+![alt text](readme_img/image.png)
 ### 於 redis 資料夾中新增 rediscluster.conf 檔案
 範例
 ```shell
@@ -56,6 +132,12 @@ cluster_stats_messages_pong_received:67
 cluster_stats_messages_meet_received:1
 cluster_stats_messages_received:136
 ```
+
+## 執行 producer-consumer model
+* 在專案目錄下直接執行 main.go 即可
+
+如果看到類似以下輸出的 log 資訊，即為成功
+![alt text](readme_img/image1.png)
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
