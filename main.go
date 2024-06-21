@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"time"
 
 	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
@@ -71,12 +72,6 @@ func initLogger() *logrus.Logger {
 
 var ctx = context.Background() // context for redis
 
-func Producer(rdb *redis.ClusterClient, log *logrus.Logger) {
-	for i := 0; i < 1000; i++ {
-		PublishingMessage(rdb, log, i)
-	}
-}
-
 func PublishingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) {
 	//Publishing message to stream
 	_, err := rdb.XAdd(ctx, &redis.XAddArgs{ // add message to a new stream, if stream not exist, create a new one
@@ -91,7 +86,77 @@ func PublishingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) {
 	log.Infof("Send Message: \"Message ID: %d\"", i)
 }
 
-func Consumer(rdb *redis.ClusterClient, log *logrus.Logger) {
+func Producer(log *logrus.Logger) {
+	//parameters for connecting to redis cluster
+	options := redis.ClusterOptions{
+		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Password: os.Getenv("REDIS_PASSWORD"),
+	}
+
+	//connect to redis cluster
+	rdb := redis.NewClusterClient(&options)
+
+	for i := 0; i < 1000; i++ {
+		PublishingMessage(rdb, log, i)
+	}
+}
+
+func AutoClaim(log *logrus.Logger) {
+	//parameters for connecting to redis cluster
+	options := redis.ClusterOptions{
+		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Password: os.Getenv("REDIS_PASSWORD"),
+	}
+
+	//connect to redis cluster
+	rdb := redis.NewClusterClient(&options)
+
+	//Creating a consumer group, if exists, we can ignore the error
+	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "$").Result()
+	if err != nil {
+		log.Error(err)
+	}
+
+	start := "0-0" // start from the beginning
+	//Auto claim messages that have been idle for 300 seconds
+	for {
+		messages, nextStart, err := rdb.XAutoClaim(ctx, &redis.XAutoClaimArgs{
+			Stream:   os.Getenv("STREAM_NAME"),
+			Group:    os.Getenv("CUSTOMER_GROUPNAME"),
+			Consumer: "testConsumer",
+			MinIdle:  300000 * time.Millisecond, // claim messages that have been idle for 300 seconds
+			Start:    start,                     // start from the last message
+			Count:    100,                       // claim 100 messages at a time
+		}).Result()
+
+		if err != nil {
+			log.Fatal(err)
+		}
+
+		for _, event := range messages {
+			log.Warnf("claim Message: \"%s\"", event.Values["message"])
+
+			// Acknowledge the message
+			_, err := rdb.XAck(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), event.ID).Result()
+			if err != nil {
+				log.Fatal(err)
+			}
+		}
+
+		start = nextStart
+	}
+}
+
+func Consumer(log *logrus.Logger) {
+	//parameters for connecting to redis cluster
+	options := redis.ClusterOptions{
+		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Password: os.Getenv("REDIS_PASSWORD"),
+	}
+
+	//connect to redis cluster
+	rdb := redis.NewClusterClient(&options)
+
 	//Creating a consumer group, if exists, we can ignore the error
 	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "$").Result()
 	if err != nil {
@@ -115,6 +180,12 @@ func Consumer(rdb *redis.ClusterClient, log *logrus.Logger) {
 		for _, message := range messages {
 			for _, event := range message.Messages {
 				log.Infof("Receive Message: \"%s\"", event.Values["message"])
+
+				// Acknowledge the message
+				_, err := rdb.XAck(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), event.ID).Result()
+				if err != nil {
+					log.Fatal(err)
+				}
 			}
 		}
 	}
@@ -146,6 +217,7 @@ func main() {
 	// PONG
 	log.Info(pingResult)
 
-	go Producer(rdb, log) // start producer
-	Consumer(rdb, log)    // start consumer
+	go Producer(log)  // start producer
+	go AutoClaim(log) // start auto claim, auto claim will claim messages that have been idle for 300 seconds
+	Consumer(log)     // start consumer
 }
