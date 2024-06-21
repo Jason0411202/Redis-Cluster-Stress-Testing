@@ -130,7 +130,7 @@ func AutoClaim(log *logrus.Logger) {
 		}).Result()
 
 		if err != nil {
-			log.Fatal(err)
+			log.Warn(err)
 		}
 
 		for _, event := range messages {
