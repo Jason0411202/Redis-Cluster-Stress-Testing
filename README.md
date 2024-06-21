@@ -256,7 +256,7 @@ cluster_stats_messages_received:136
 5. https://www.cnblogs.com/goldsunshine/p/17410148.html
 
 ## 待做
-1. XAUTOCLAIM 邏輯
-2. 實驗: consumer拿掉，使 memory 漲超過 max memory，觀察發生什麼事
-3. 實驗: 持續送過程中把 master 砍掉會發生什麼事，以及觀察 failover 機制
-4. 實驗: 分別關掉 ACK 以及 Auto claim，觀察掉資料的情況
+- [x] XAUTOCLAIM 邏輯
+- [ ] 實驗: consumer拿掉，使 memory 漲超過 max memory，觀察發生什麼事
+- [x] 實驗: 持續送過程中把 master 砍掉會發生什麼事，以及觀察 failover 機制
+- [ ] 實驗: 分別關掉 ACK 以及 Auto claim，觀察掉資料的情況
