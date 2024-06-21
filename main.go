@@ -96,7 +96,7 @@ func Producer(log *logrus.Logger) {
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
 
-	for i := 0; i < 1000; i++ {
+	for i := 0; i < 100000000; i++ {
 		PublishingMessage(rdb, log, i)
 	}
 }
