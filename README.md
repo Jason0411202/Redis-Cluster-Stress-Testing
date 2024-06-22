@@ -274,8 +274,19 @@ cluster_stats_messages_received:136
     ```
     這應該是因為過半數 master node 失效時，redis cluster 將無法繼續提供服務
 
-### 分別關掉 ACK 以及 Auto claim，觀察掉資料的情況
-
+### Auto claim 對於掉資料的影響
+1. 為了模擬掉資料可能發生的情境，故修改了 main.go，讓 consumer 有小概率會發生當機，讀取了訊息卻未處理完畢 (未 ACK)
+   ![alt text](image-4.png)
+2. 來到本專案根目錄下，先使用以下指令啟動 redis cluster
+    ```shell
+    docker-compose up -d --build
+    ```
+3. 接著透過以下指令啟動 producer-consumer model，觀察 log 輸出
+    ```shell
+    go run main.go
+    ```
+4. 一開始執行時，producer 以及 consumer 都正常運作，producer 不斷送出 message 至 redis stream 中，而 consumer 也不斷地從 stream 中取出訊息，但經過一段時間後，consumer 觸發了當機機制，讀取了訊息卻未處理完畢；而 producer 仍然持續送出訊息，直到將訊息送完。最後，在偵測到某個 message 讀取後未 ACK 一段時間，Auto claim 機制將會自動將該訊息重新 claim 回來處理；也就是說，若是沒有 Auto claim 機制，則未處理完的訊息可能丟失
+   ![alt text](image-5.png)
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
@@ -288,4 +299,4 @@ cluster_stats_messages_received:136
 - [x] XAUTOCLAIM 邏輯
 - [x] 實驗: consumer拿掉，使 memory 漲超過 max memory，觀察發生什麼事
 - [x] 實驗: 持續送過程中把 master 砍掉會發生什麼事，以及觀察 failover 機制
-- [ ] 實驗: 分別關掉 ACK 以及 Auto claim，觀察掉資料的情況
+- [ ] 實驗: 關掉Auto claim，觀察掉資料的情況
