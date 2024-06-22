@@ -83,7 +83,7 @@ func PublishingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) {
 	if err != nil {
 		log.Fatal(err)
 	}
-	log.Infof("Send Message: \"Message ID: %d\"", i)
+	//log.Infof("Send Message: \"Message ID: %d\"", i)
 }
 
 func Producer(log *logrus.Logger) {
@@ -96,7 +96,7 @@ func Producer(log *logrus.Logger) {
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
 
-	for i := 0; i < 100000000; i++ {
+	for i := 0; i < 10000; i++ {
 		PublishingMessage(rdb, log, i)
 	}
 }
@@ -179,12 +179,17 @@ func Consumer(log *logrus.Logger) {
 
 		for _, message := range messages {
 			for _, event := range message.Messages {
-				log.Infof("Receive Message: \"%s\"", event.Values["message"])
+				//log.Infof("Receive Message: \"%s\"", event.Values["message"])
 
 				// Acknowledge the message
 				_, err := rdb.XAck(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), event.ID).Result()
 				if err != nil {
 					log.Fatal(err)
+				}
+
+				if event.Values["message"] == "Message ID: 9999" {
+					log.Info("AutoClaim finish!")
+					return
 				}
 			}
 		}
@@ -217,7 +222,11 @@ func main() {
 	// PONG
 	log.Info(pingResult)
 
+	// 計時
+	start := time.Now()
 	go Producer(log)  // start producer
 	go AutoClaim(log) // start auto claim, auto claim will claim messages that have been idle for 300 seconds
 	Consumer(log)     // start consumer
+	elapsed := time.Since(start)
+	log.Infof("All process finished in %s", elapsed)
 }
