@@ -304,4 +304,5 @@ cluster_stats_messages_received:136
 - [x] XAUTOCLAIM 邏輯
 - [x] 實驗: consumer拿掉，使 memory 漲超過 max memory，觀察發生什麼事
 - [x] 實驗: 持續送過程中把 master 砍掉會發生什麼事，以及觀察 failover 機制
-- [ ] 實驗: 關掉Auto claim，觀察掉資料的情況
+- [x] 實驗: 關掉Auto claim，觀察掉資料的情況
+- [x] 是否開啟 Aof 對本次實驗架構的影響
