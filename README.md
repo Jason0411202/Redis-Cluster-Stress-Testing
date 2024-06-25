@@ -143,7 +143,7 @@ If you see log information similar to the following output, the program has run 
     ```
 4. Check the Redis cluster node status with the following command:
     ```shell
-    redis-cli -a "replace with your redis password" -p 7005 cluster nodes
+    redis-cli -a "replace with your redis password" -p 7000 cluster nodes
     ```
     Output:
     ```
@@ -333,7 +333,7 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
     ```
 4. 透過以下指令觀察 redis cluster node 狀態
     ```shell
-    redis-cli -a "replace with your redis password" -p 7005 cluster nodes
+    redis-cli -a "replace with your redis password" -p 7000 cluster nodes
     ```
     輸出:
     ```
