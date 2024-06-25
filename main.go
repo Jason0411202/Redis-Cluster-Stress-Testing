@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"os"
 	"path/filepath"
+	"strconv"
 	"time"
 
 	"github.com/joho/godotenv"
@@ -72,7 +73,7 @@ func initLogger() *logrus.Logger {
 
 var ctx = context.Background() // context for redis
 
-func PublishingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) {
+func ProducingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) (return_error error) {
 	//Publishing message to stream
 	_, err := rdb.XAdd(ctx, &redis.XAddArgs{ // add message to a new stream, if stream not exist, create a new one
 		Stream: os.Getenv("STREAM_NAME"),
@@ -81,9 +82,11 @@ func PublishingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) {
 		},
 	}).Result()
 	if err != nil {
-		log.Fatal(err)
+		return err
 	}
 	//log.Infof("Send Message: \"Message ID: %d\"", i)
+
+	return nil
 }
 
 func Producer(log *logrus.Logger) {
@@ -96,9 +99,57 @@ func Producer(log *logrus.Logger) {
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
 
-	for i := 0; i < 10000; i++ {
-		PublishingMessage(rdb, log, i)
+	Publishing_message_num, _ := strconv.Atoi(os.Getenv("Publishing_message_num"))
+	for i := 0; i < Publishing_message_num; i++ {
+		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
+		start := time.Now()                                  // calculate the time that retry takes when producing message
+		retry_flag := false
+		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
+			err := ProducingMessage(rdb, log, i)
+			if err == nil {
+				break
+			} else {
+				start = time.Now()
+				retry_flag = true
+				if retry_cnt == Max_retry-1 {
+					log.Fatal(err)
+				} else {
+					log.Warn(err)
+				}
+			}
+		}
+		if retry_flag == true {
+			elapsed := time.Since(start)
+			log.Warnf("recover in %s", elapsed)
+		}
 	}
+}
+
+func AutoClaimingMessage(rdb *redis.ClusterClient, log *logrus.Logger, start string) (nextStart string, return_error error) {
+	messages, nextStart, err := rdb.XAutoClaim(ctx, &redis.XAutoClaimArgs{
+		Stream:   os.Getenv("STREAM_NAME"),
+		Group:    os.Getenv("CUSTOMER_GROUPNAME"),
+		Consumer: "testConsumer",
+		MinIdle:  300000 * time.Millisecond, // claim messages that have been idle for 300 seconds
+		Start:    start,                     // start from the last message
+		Count:    100,                       // claim 100 messages at a time
+	}).Result()
+
+	if err != nil {
+		return "", err
+	}
+
+	for _, event := range messages {
+		log.Warnf("claim Message: \"%s\"", event.Values["message"])
+
+		// Acknowledge the message
+		_, err := rdb.XAck(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), event.ID).Result()
+		if err != nil {
+			return "", err
+		}
+	}
+
+	return nextStart, nil
 }
 
 func AutoClaim(log *logrus.Logger) {
@@ -120,31 +171,57 @@ func AutoClaim(log *logrus.Logger) {
 	start := "0-0" // start from the beginning
 	//Auto claim messages that have been idle for 300 seconds
 	for {
-		messages, nextStart, err := rdb.XAutoClaim(ctx, &redis.XAutoClaimArgs{
-			Stream:   os.Getenv("STREAM_NAME"),
-			Group:    os.Getenv("CUSTOMER_GROUPNAME"),
-			Consumer: "testConsumer",
-			MinIdle:  300000 * time.Millisecond, // claim messages that have been idle for 300 seconds
-			Start:    start,                     // start from the last message
-			Count:    100,                       // claim 100 messages at a time
-		}).Result()
-
-		if err != nil {
-			log.Warn(err)
+		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
+		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
+			nextStart, err := AutoClaimingMessage(rdb, log, start)
+			if err == nil {
+				start = nextStart
+				break
+			} else {
+				if retry_cnt == Max_retry-1 {
+					log.Fatal(err)
+				} else {
+					log.Warn(err)
+				}
+			}
 		}
+	}
+}
 
-		for _, event := range messages {
-			log.Warnf("claim Message: \"%s\"", event.Values["message"])
+func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_error error) {
+	messages, err := rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
+		Group:    os.Getenv("CUSTOMER_GROUPNAME"),
+		Consumer: "testConsumer",
+		Streams:  []string{os.Getenv("STREAM_NAME"), ">"},
+		Block:    0,     // 0 means block until a new message arrives
+		Count:    1,     // read 1 message at a time
+		NoAck:    false, // set to false to enable message acknowledgment
+	}).Result()
+	if err != nil {
+		return err
+	}
+
+	for _, message := range messages {
+		for _, event := range message.Messages {
+			//log.Infof("Receive Message: \"%s\"", event.Values["message"])
+
+			// experiment: simulate client crash
+			// randomNum := rand.Intn(1000)
+			// if randomNum == 1 {
+			// 	log.Warn("simulate client crash")
+			// 	for {
+			// 	}
+			// }
 
 			// Acknowledge the message
 			_, err := rdb.XAck(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), event.ID).Result()
 			if err != nil {
-				log.Fatal(err)
+				return err
 			}
 		}
-
-		start = nextStart
 	}
+
+	return nil
 }
 
 func Consumer(log *logrus.Logger) {
@@ -164,32 +241,23 @@ func Consumer(log *logrus.Logger) {
 	}
 
 	//Reading messages from stream
+	Publishing_message_num, _ := strconv.Atoi(os.Getenv("Publishing_message_num"))
+	Consuming_message_num := 0
 	for {
-		messages, err := rdb.XReadGroup(ctx, &redis.XReadGroupArgs{
-			Group:    os.Getenv("CUSTOMER_GROUPNAME"),
-			Consumer: "testConsumer",
-			Streams:  []string{os.Getenv("STREAM_NAME"), ">"},
-			Block:    0,     // 0 means block until a new message arrives
-			Count:    1,     // read 1 message at a time
-			NoAck:    false, // set to false to enable message acknowledgment
-		}).Result()
-		if err != nil {
-			log.Fatal(err)
+		if Consuming_message_num >= Publishing_message_num {
+			break
 		}
-
-		for _, message := range messages {
-			for _, event := range message.Messages {
-				//log.Infof("Receive Message: \"%s\"", event.Values["message"])
-
-				// Acknowledge the message
-				_, err := rdb.XAck(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), event.ID).Result()
-				if err != nil {
+		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
+		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
+			err := ConsumingMessage(rdb, log)
+			if err == nil {
+				Consuming_message_num++
+				break
+			} else {
+				if retry_cnt == Max_retry-1 {
 					log.Fatal(err)
-				}
-
-				if event.Values["message"] == "Message ID: 9999" {
-					log.Info("AutoClaim finish!")
-					return
+				} else {
+					log.Warn(err)
 				}
 			}
 		}
