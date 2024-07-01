@@ -220,6 +220,9 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 				return err
 			}
 			Consuming_message_num++
+			if Consuming_message_num%1000 == 0 {
+				log.Infof("Receive Message: \"%s\"", event.Values["message"])
+			}
 		}
 	}
 
