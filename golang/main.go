@@ -83,7 +83,9 @@ func ProducingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) (retu
 	if err != nil {
 		return err
 	}
-	//log.Infof("Send Message: \"Message ID: %d\"", i)
+	if i%1000 == 0 {
+		log.Infof("Send Message: \"Message ID: %d\"", i)
+	}
 
 	return nil
 }
@@ -217,11 +219,14 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 			if err != nil {
 				return err
 			}
+			Consuming_message_num++
 		}
 	}
 
 	return nil
 }
+
+var Consuming_message_num = 0
 
 func Consumer(log *logrus.Logger) {
 	//parameters for connecting to redis cluster
@@ -241,7 +246,6 @@ func Consumer(log *logrus.Logger) {
 
 	//Reading messages from stream
 	Publishing_message_num, _ := strconv.Atoi(os.Getenv("Publishing_message_num"))
-	Consuming_message_num := 0
 	for {
 		if Consuming_message_num >= Publishing_message_num {
 			break
@@ -250,7 +254,6 @@ func Consumer(log *logrus.Logger) {
 		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
 			err := ConsumingMessage(rdb, log)
 			if err == nil {
-				Consuming_message_num++
 				break
 			} else {
 				if retry_cnt == Max_retry-1 {

@@ -376,6 +376,13 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 * 本實驗著重於探討即使讓 redis 的 maxmemory 限制在不超過設備 memory 上限的相同固定大小，但在設備 memory 上限本身就不同的情況下，會不會影響到 redis 的 read/write performance 以及重啟復歸的所消耗的時間 (即實驗變因為設備 memory 上限)
 * 本實驗分別採用兩台 VM 類型不同的 Azure 虛擬機進行實驗，分別為 D2_v4 以及 E2_v4
     ![alt text](image-6.png)
+#### redis 的 read/write performance 實驗
+* 在本實驗中，將會測試 producer 與 comsumer 收發共 20000 筆資料所消耗的時間
+  * D2_v4: 6.21626547s, 6.333044992s, 6.305611232s
+
+#### 重啟復歸的所消耗的時間實驗
+* 在本實驗中，將會嘗試手動停止 master 節點 (:7000 node) 的運作，並觀察 producer-consumer model 需要花多少時間才能恢復正常運作 
+  * D2_v4: 121.335212ms, 84.42643ms, 47.695561ms, 79.043987ms, 104.904173ms
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
