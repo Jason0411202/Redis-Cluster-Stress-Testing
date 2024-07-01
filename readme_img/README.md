@@ -374,8 +374,8 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 
 ### 設備的 memory size 對於效能的影響
 * 本實驗著重於探討即使讓 redis 的 maxmemory 限制在不超過設備 memory 上限的相同固定大小，但在設備 memory 上限本身就不同的情況下，會不會影響到 redis 的 read/write performance 以及重啟復歸的所消耗的時間 (即實驗變因為設備 memory 上限)
-* 本實驗分別採用兩台 VM 類型不同的 Azure 虛擬機進行實驗，分別為 B1s 以及 B1ls
-    ![alt text](image-5.png)
+* 本實驗分別採用兩台 VM 類型不同的 Azure 虛擬機進行實驗，分別為 D2_v4 以及 E2_v4
+    ![alt text](image-6.png)
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
