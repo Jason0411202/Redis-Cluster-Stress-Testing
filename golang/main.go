@@ -148,6 +148,7 @@ func AutoClaimingMessage(rdb *redis.ClusterClient, log *logrus.Logger, start str
 		if err != nil {
 			return "", err
 		}
+		Consuming_message_num++
 	}
 
 	return nextStart, nil
