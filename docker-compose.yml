@@ -8,7 +8,7 @@ services:
       - "7000:7000"
       - "17000:17000"
     restart: always
-    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7000", "--cluster-announce-ip", "${ip}", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
+    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7000", "--cluster-announce-ip", "redis-node1", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: redis-node1
     networks:
       - redis-network
@@ -20,7 +20,7 @@ services:
       - "7001:7001"
       - "17001:17001"
     restart: always
-    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7001", "--cluster-announce-ip", "${ip}", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
+    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7001", "--cluster-announce-ip", "redis-node2", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: redis-node2
     networks:
       - redis-network
@@ -32,7 +32,7 @@ services:
       - "7002:7002"
       - "17002:17002"
     restart: always
-    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7002", "--cluster-announce-ip", "${ip}", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
+    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7002", "--cluster-announce-ip", "redis-node3", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: redis-node3
     networks:
       - redis-network
@@ -44,7 +44,7 @@ services:
       - "7003:7003"
       - "17003:17003"
     restart: always
-    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7003", "--cluster-announce-ip", "${ip}", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
+    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7003", "--cluster-announce-ip", "redis-node4", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: redis-node4
     networks:
       - redis-network
@@ -60,7 +60,7 @@ services:
       - "7004:7004"
       - "17004:17004"
     restart: always
-    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7004", "--cluster-announce-ip", "${ip}", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
+    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7004", "--cluster-announce-ip", "redis-node5", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: redis-node5
     networks:
       - redis-network
@@ -76,7 +76,7 @@ services:
       - "7005:7005"
       - "17005:17005"
     restart: always
-    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7005", "--cluster-announce-ip", "${ip}", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
+    entrypoint: ["redis-server", "/etc/redis/rediscluster.conf", "--port", "7005", "--cluster-announce-ip", "redis-node6", "--appendonly", "yes", "--maxmemory", "300mb", "--maxmemory-policy", "allkeys-lru"]
     container_name: redis-node6
     networks:
       - redis-network
