@@ -9,7 +9,6 @@ import (
 	"strconv"
 	"time"
 
-	"github.com/joho/godotenv"
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
 )
@@ -92,7 +91,7 @@ func ProducingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) (retu
 func Producer(log *logrus.Logger) {
 	//parameters for connecting to redis cluster
 	options := redis.ClusterOptions{
-		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
 		Password: os.Getenv("REDIS_PASSWORD"),
 	}
 
@@ -155,7 +154,7 @@ func AutoClaimingMessage(rdb *redis.ClusterClient, log *logrus.Logger, start str
 func AutoClaim(log *logrus.Logger) {
 	//parameters for connecting to redis cluster
 	options := redis.ClusterOptions{
-		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
 		Password: os.Getenv("REDIS_PASSWORD"),
 	}
 
@@ -227,7 +226,7 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 func Consumer(log *logrus.Logger) {
 	//parameters for connecting to redis cluster
 	options := redis.ClusterOptions{
-		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
 		Password: os.Getenv("REDIS_PASSWORD"),
 	}
 
@@ -268,14 +267,14 @@ func main() {
 	log := initLogger()
 	log.Info("producer start!")
 
-	err := godotenv.Load(".env")
-	if err != nil {
-		log.Fatal("cnanot load .env file")
-	}
+	// err := godotenv.Load(".env")
+	// if err != nil {
+	// 	log.Fatal("cnanot load .env file")
+	// }
 
 	//parameters for connecting to redis cluster
 	options := redis.ClusterOptions{
-		Addrs:    []string{":7000", ":7001", ":7002", ":7003", ":7004", ":7005"},
+		Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
 		Password: os.Getenv("REDIS_PASSWORD"),
 	}
 

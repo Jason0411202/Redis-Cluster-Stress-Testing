@@ -97,6 +97,15 @@ services:
       - redis-node6
     networks:
       - redis-network
+  producer-comsumer-model:
+    build:
+      context: golang
+    depends_on:
+      - redis-cluster-creator
+    networks:
+      - redis-network
+    env_file:
+      - .env
   
 networks:
   redis-network:
