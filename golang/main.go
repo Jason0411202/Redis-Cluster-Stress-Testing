@@ -131,9 +131,9 @@ func AutoClaimingMessage(rdb *redis.ClusterClient, log *logrus.Logger, start str
 		Stream:   os.Getenv("STREAM_NAME"),
 		Group:    os.Getenv("CUSTOMER_GROUPNAME"),
 		Consumer: "testConsumer",
-		MinIdle:  300000 * time.Millisecond, // claim messages that have been idle for 300 seconds
-		Start:    start,                     // start from the last message
-		Count:    100,                       // claim 100 messages at a time
+		MinIdle:  3000 * time.Millisecond, // claim messages that have been idle for 3 seconds
+		Start:    start,                   // start from the last message
+		Count:    100,                     // claim 100 messages at a time
 	}).Result()
 
 	if err != nil {
