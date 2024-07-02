@@ -30,10 +30,14 @@ STREAM_NAME="your_stream_name"
 CUSTOMER_GROUPNAME="your_customer_groupname"
 ```
 
-### Start Redis Cluster
+### Start Redis Cluster and the Producer-Consumer Model
 ```shell
 docker-compose up -d --build
 ```
+
+If you see log information similar to the following output, the program has run successfully:
+![Log Output](readme_img/image1.png)
+
 ### Check if Redis Cluster is Running Properly
 ```shell
 redis-cli -a "your_redis_password" -p 7000 cluster info
@@ -74,12 +78,6 @@ cc4a188cf6ba936c097776f1a1fe203395f710bb 26.9.179.171:7001@17001 slave eb672df8d
 eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719301572982 8 connected 5461-10922
 7651df59f610c9619ea8ecef840737344a762e12 26.9.179.171:7002@17002 master - 0 1719301573485 3 connected 10923-16383
 ```
-
-## Run the Producer-Consumer Model
-* Run `main.go` directly in the project directory
-
-If you see log information similar to the following output, the program has run successfully:
-![Log Output](readme_img/image1.png)
 
 ## Experiment
 ### Remove consumer, let memory exceed max memory, and observe what happens
@@ -182,6 +180,21 @@ If you see log information similar to the following output, the program has run 
   * With AOF: 13.1419384s, 12.8154547s, 13.0021116s, average 12.9865016s
 * It is observed that enabling AOF does slightly impact performance.
 
+### The Impact of Memory Size on Device Performance
+* This experiment focuses on investigating whether the read/write performance of Redis and the time consumed for reboot recovery are affected when the maxmemory of Redis is limited to the same fixed size that does not exceed the device's memory limit, but the memory limit of the device itself is different (i.e., the experimental variable is the device's memory limit).
+* This experiment is conducted using two different types of Azure VMs, namely D2_v4 and E2_v4.
+    ![alt text](readme_img/image-6.png)
+#### Redis Read/Write Performance Experiment
+* In this experiment, the time consumed for sending and receiving a total of 100,000 pieces of data by the producer and consumer will be tested.
+  * D2_v4: 31.341657201s, 32.108275546s, 31.677828557s, average 31.7092538s
+  * E2_v4: 30.71179363s, 30.326766059s, 31.027703164s, average 30.6887543s
+
+#### Time Consumed for Reboot Recovery Experiment
+* In this experiment, we will manually stop the master node (:7000 node) and observe how long it takes for the producer-consumer model to resume normal operation.
+  * D2_v4: 121.335212ms, 84.42643ms, 47.695561ms, 79.043987ms, 104.904173ms, average 87.4810726ms
+  * E2_v4: 38.944681ms, 30.115289ms, 55.319198ms, 74.983684ms, 63.617445ms, average 52.5960594ms
+
+
 ## References
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
 2. https://blog.yowko.com/docker-compose-redis-cluster/
@@ -219,10 +232,13 @@ STREAM_NAME= 「用來交換訊息的 stream name」
 CUSTOMER_GROUPNAME=「customer 的 group name」
 ```
 
-### 啟動 Redis Cluster
+### 啟動 Redis Cluster 以及 producer-consumer model
 ```shell
 docker-compose up -d --build
 ```
+
+如果在 producer-consumer model 輸出的 log 中看到類似以下的資訊，即為成功
+![alt text](readme_img/image1.png)
 
 ### 確認 redis cluster 是否正常運作
 ```shell
@@ -264,12 +280,6 @@ cc4a188cf6ba936c097776f1a1fe203395f710bb 26.9.179.171:7001@17001 slave eb672df8d
 eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719301572982 8 connected 5461-10922
 7651df59f610c9619ea8ecef840737344a762e12 26.9.179.171:7002@17002 master - 0 1719301573485 3 connected 10923-16383
 ```
-
-## 執行 producer-consumer model
-* 在專案目錄下直接執行 main.go 即可
-
-如果看到類似以下輸出的 log 資訊，即為成功
-![alt text](readme_img/image1.png)
 
 ## 實驗
 ### consumer拿掉，使 memory 漲超過 max memory，觀察發生什麼事
@@ -375,15 +385,16 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 ### 設備的 memory size 對於效能的影響
 * 本實驗著重於探討即使讓 redis 的 maxmemory 限制在不超過設備 memory 上限的相同固定大小，但在設備 memory 上限本身就不同的情況下，會不會影響到 redis 的 read/write performance 以及重啟復歸的所消耗的時間 (即實驗變因為設備 memory 上限)
 * 本實驗分別採用兩台 VM 類型不同的 Azure 虛擬機進行實驗，分別為 D2_v4 以及 E2_v4
-    ![alt text](image-6.png)
+    ![alt text](readme_img/image-6.png)
 #### redis 的 read/write performance 實驗
-* 在本實驗中，將會測試 producer 與 comsumer 收發共 20000 筆資料所消耗的時間
-  * D2_v4: 6.21626547s, 6.333044992s, 6.305611232s
-  * D2_v4: 31.341657201s, 31.677828557s
+* 在本實驗中，將會測試 producer 與 comsumer 收發共 100000 筆資料所消耗的時間
+  * D2_v4: 31.341657201s, 32.108275546s, 31.677828557s, 平均 31.7092538s
+  * E2_v4: 30.71179363s, 30.326766059s, 31.027703164s, 平均 30.6887543s
 
 #### 重啟復歸的所消耗的時間實驗
 * 在本實驗中，將會嘗試手動停止 master 節點 (:7000 node) 的運作，並觀察 producer-consumer model 需要花多少時間才能恢復正常運作 
-  * D2_v4: 121.335212ms, 84.42643ms, 47.695561ms, 79.043987ms, 104.904173ms
+  * D2_v4: 121.335212ms, 84.42643ms, 47.695561ms, 79.043987ms, 104.904173ms, 平均 87.4810726ms
+  * E2_v4: 38.944681ms, 30.115289ms, 55.319198ms, 74.983684ms, 63.617445ms, 平均 52.5960594ms
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
