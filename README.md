@@ -28,6 +28,7 @@ ip="your_device_ip"
 REDIS_PASSWORD="your_redis_password"  # Must match the password in rediscluster.conf
 STREAM_NAME="your_stream_name"
 CUSTOMER_GROUPNAME="your_customer_groupname"
+MaxEntries="maximum number of messages to be preloaded to control memory usage"
 ```
 
 ### Start Redis Cluster and the Producer-Consumer Model
@@ -230,6 +231,7 @@ ip=「你的設備 IP」
 REDIS_PASSWORD=「自行設定的 redis 資料庫密碼，要與 rediscluster.conf 一致」
 STREAM_NAME= 「用來交換訊息的 stream name」
 CUSTOMER_GROUPNAME=「customer 的 group name」
+MaxEntries=「預先置入的最大訊息數量，用於控制記憶體使用量」
 ```
 
 ### 啟動 Redis Cluster 以及 producer-consumer model

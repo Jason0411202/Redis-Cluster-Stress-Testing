@@ -11,6 +11,7 @@ import (
 
 	"github.com/redis/go-redis/v9"
 	"github.com/sirupsen/logrus"
+	"golang.org/x/exp/rand"
 )
 
 // log template
@@ -270,6 +271,42 @@ func Consumer(log *logrus.Logger) {
 	}
 }
 
+func randomString(n int) string {
+	const letters = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ"
+	rand.Seed(0)
+	b := make([]byte, n)
+	for i := range b {
+		b[i] = letters[rand.Intn(len(letters))]
+	}
+	return string(b)
+}
+
+func FillRedisMemory(rdb *redis.ClusterClient) {
+	MaxEntries, _ := strconv.Atoi(os.Getenv("MaxEntries"))
+	var (
+		keyPrefix  = "key:"
+		valueSize  = 1000 // 每個鍵的值大小 (bytes)
+		batchSize  = 100  // 每次寫入的鍵數
+		maxEntries = MaxEntries
+	)
+
+	ctx := context.Background()
+	for i := 0; i < maxEntries; i++ {
+		pipe := rdb.Pipeline()
+		for j := 0; j < batchSize; j++ {
+			key := fmt.Sprintf("%s%d", keyPrefix, i*batchSize+j)
+			value := randomString(valueSize)
+			pipe.Set(ctx, key, value, 0)
+		}
+		_, err := pipe.Exec(ctx)
+		if err != nil {
+			break
+		}
+	}
+
+	fmt.Println("write success!")
+}
+
 func main() {
 	log := initLogger()
 	log.Info("producer start!")
@@ -295,6 +332,8 @@ func main() {
 	}
 	// PONG
 	log.Info(pingResult)
+
+	FillRedisMemory(rdb)
 
 	// 計時
 	start := time.Now()
