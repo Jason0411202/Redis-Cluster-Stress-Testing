@@ -283,7 +283,7 @@ func randomString(n int) string {
 	return string(b)
 }
 
-func FillRedisMemory(rdb *redis.ClusterClient) {
+func FillRedisMemory(rdb *redis.ClusterClient, log *logrus.Logger) {
 	MaxEntries, _ := strconv.Atoi(os.Getenv("MaxEntries"))
 	var (
 		keyPrefix  = "key:"
@@ -302,11 +302,12 @@ func FillRedisMemory(rdb *redis.ClusterClient) {
 		}
 		_, err := pipe.Exec(ctx)
 		if err != nil {
+			log.Error(err)
 			break
 		}
 	}
 
-	fmt.Println("write success!")
+	log.Info("write success!")
 }
 
 var start = time.Now()
@@ -337,7 +338,7 @@ func main() {
 	// PONG
 	log.Info(pingResult)
 
-	FillRedisMemory(rdb)
+	FillRedisMemory(rdb, log)
 
 	// 計時
 	start = time.Now()
