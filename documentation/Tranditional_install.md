@@ -83,6 +83,7 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 - [持續送過程中把 master 砍掉會發生什麼事，以及觀察 failover 機制](Exp2_TranditionalChinese.md)
 - [關掉Auto claim，觀察掉資料的情況](Exp3_TranditionalChinese.md)
 - [是否開啟 Aof 對本次實驗架構的影響](Exp4_TranditionalChinese.md)
+- [不同的 redis 記憶體上限限制對於性能的影響](Exp5_TranditionalChinese.md)
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
