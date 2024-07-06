@@ -221,10 +221,6 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 			if err != nil {
 				return err
 			}
-			Consuming_message_num++
-			if Consuming_message_num%1000 == 0 {
-				log.Infof("Receive Message: \"%s\"", event.Values["message"])
-			}
 		}
 	}
 
@@ -255,6 +251,11 @@ func Consumer(log *logrus.Logger) {
 		if Consuming_message_num >= Publishing_message_num {
 			break
 		}
+		Consuming_message_num++
+		if Consuming_message_num%1000 == 0 {
+			log.Infof("Consuming_message_num count: \"%d\"", Consuming_message_num)
+		}
+
 		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
 		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
 			err := ConsumingMessage(rdb, log)
