@@ -252,8 +252,9 @@ func Consumer(log *logrus.Logger) {
 			break
 		}
 		Consuming_message_num++
-		if Consuming_message_num%1000 == 0 {
+		if Consuming_message_num%10000 == 0 {
 			log.Infof("Consuming_message_num count: \"%d\"", Consuming_message_num)
+			log.Infof(("time elapsed: %s"), time.Since(start))
 		}
 
 		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
@@ -308,6 +309,8 @@ func FillRedisMemory(rdb *redis.ClusterClient) {
 	fmt.Println("write success!")
 }
 
+var start = time.Now()
+
 func main() {
 	log := initLogger()
 	log.Info("producer start!")
@@ -337,7 +340,7 @@ func main() {
 	FillRedisMemory(rdb)
 
 	// 計時
-	start := time.Now()
+	start = time.Now()
 	go Producer(log)  // start producer
 	go AutoClaim(log) // start auto claim, auto claim will claim messages that have been idle for 300 seconds
 	Consumer(log)     // start consumer
