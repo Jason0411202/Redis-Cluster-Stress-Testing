@@ -303,6 +303,7 @@ func FillRedisMemory(rdb *redis.ClusterClient, log *logrus.Logger) {
 		_, err := pipe.Exec(ctx)
 		if err != nil {
 			log.Error(err)
+			log.Info("have written", i*batchSize, "keys")
 			break
 		}
 	}
