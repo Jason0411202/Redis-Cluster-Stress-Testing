@@ -196,9 +196,9 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 		Group:    os.Getenv("CUSTOMER_GROUPNAME"),
 		Consumer: "testConsumer",
 		Streams:  []string{os.Getenv("STREAM_NAME"), ">"},
-		Block:    0,     // 0 means block until a new message arrives
-		Count:    1,     // read 1 message at a time
-		NoAck:    false, // set to false to enable message acknowledgment
+		Block:    1 * time.Millisecond, // block for 1 millisecond
+		Count:    1,                    // read 1 message at a time
+		NoAck:    false,                // set to false to enable message acknowledgment
 	}).Result()
 	if err != nil {
 		return err
