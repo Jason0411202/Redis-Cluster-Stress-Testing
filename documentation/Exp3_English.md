@@ -11,3 +11,6 @@
     ```
 4. Initially, both the producer and consumer operate normally. The producer continuously sends messages to the Redis stream, and the consumer retrieves messages from the stream. However, after some time, the consumer triggers the crash mechanism after reading messages without processing them. The producer continues to send messages until all are sent. Finally, if a message is detected to have been read but not ACKed for a period, the Auto Claim mechanism automatically reclaims the message for processing. Without the Auto Claim mechanism, these unprocessed messages could be lost.
    ![alt text](readme_img/image-11.png)
+
+## Summary
+Redis can use the Auto Claim mechanism to pick up messages that have timed out and not been processed. This is an important feature to ensure that messages are not lost.

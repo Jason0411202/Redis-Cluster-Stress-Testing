@@ -23,3 +23,6 @@
    ![alt text](readme_img/image-3.png)
 7. 當 producer 送到約 20000 筆訊息時，redis 的 memory 全被耗盡，連 producer 送訊息時都觸發了 OOM 錯誤；在耗盡 retry 次數後，程式中止運作
    ![alt text](readme_img/image-4.png)
+
+## 總結
+redis 在記憶體耗盡時，可能會出現一系列不可預期的情況跟錯誤，建議在程式中需要特別處理這種可能發生的情況，並盡可能預防 redis memory 完全被耗盡

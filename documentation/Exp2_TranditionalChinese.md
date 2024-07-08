@@ -51,3 +51,6 @@
     ![alt text](readme_img/image-9.png)
 7. 接著手動重啟剛剛暫停的節點 (:7000 node)，會發現該節點被切換成 slave，且不影響 producer-consumer model 的運作
     ![alt text](readme_img/image-10.png)
+
+## 總結
+redis cluster 的 failover 機制，能使得資料庫能保持高可用性，是個很實用的功能，不過在進行 failover 時，正在使用服務的程式會暫時下線，需在程式中對此進行處理 (例如新增 retry 邏輯等等)，以避免程式異常終止；另外也須注意因此而導致的掉資料情況

@@ -23,3 +23,6 @@
    ![alt text](readme_img/image-3.png)
 7. When the producer sends about 20000 messages, Redis's memory is completely exhausted, and even the producer triggers OOM (Out of Memory) errors while sending messages. After exhausting the retry count, the program stops running.
    ![alt text](readme_img/image-4.png)
+
+## Summary
+When Redis runs out of memory, a series of unexpected situations and errors may occur. It is recommended to handle these potential situations specifically in the program and to prevent Redis memory from being completely exhausted as much as possible.

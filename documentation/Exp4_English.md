@@ -3,3 +3,6 @@
   * Without AOF: 12.6642449s, 12.7502929s, 12.6436454s, average 12.6860611s
   * With AOF: 13.1419384s, 12.8154547s, 13.0021116s, average 12.9865016s
 * It is observed that enabling AOF does slightly impact performance.
+
+## Summary
+From the experiment results, it was observed that enabling AOF may slightly impact performance, but due to the small amount of experimental data, the difference is not significant.

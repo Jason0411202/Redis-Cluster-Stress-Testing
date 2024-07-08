@@ -51,3 +51,6 @@
     ![alt text](readme_img/image-9.png)
 7. Finally, manually restart the previously paused node (:7000). You'll find that the node has been switched to a slave without affecting the operation of the producer-consumer model.
     ![alt text](readme_img/image-10.png)
+
+## Summary
+The failover mechanism of a Redis cluster can maintain high availability of the database, making it a very useful feature. However, during a failover, programs using the service will temporarily go offline. This needs to be handled in the program (e.g., by adding retry logic, etc.) to avoid abnormal termination of the program. Additionally, attention should be paid to potential data loss caused by the failover.
