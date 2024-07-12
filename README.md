@@ -87,6 +87,7 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 - [Impact of Auto Claim on Data Loss](documentation/Exp3_English.md)
 - [Impact of AOF (Append-Only File) on the Experiment Structure](documentation/Exp4_English.md)
 - [The Impact of Different Redis Memory Limits on Performance](documentation/Exp5_English.md)
+- [Discussion on the Causes and Solutions of Redis Connection Pool Timeout](documentation/Exp6_English.md)
 
 ## References
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
