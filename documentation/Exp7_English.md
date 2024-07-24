@@ -26,6 +26,69 @@
 * Additionally, the Golang Redis reconnect implementation can be referenced from the following article.
   * https://cloud.tencent.com/developer/article/2355690
 
+#### Reference Code
+* The following code implements a Redis hook. When any command execution encounters an error, it triggers the Reconnect function to reconnect to the Redis server.
+
+```go
+type RedisHook struct{ Client **redis.ClusterClient }
+
+// DialHook implements redis.Hook.
+func (r RedisHook) DialHook(next redis.DialHook) redis.DialHook {
+	return func(ctx context.Context, network, addr string) (net.Conn, error) {
+		return next(ctx, network, addr)
+	}
+}
+
+// ProcessHook implements redis.Hook.
+func (r RedisHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
+	return func(ctx context.Context, cmd redis.Cmder) error {
+		next(ctx, cmd)
+		if err := cmd.Err(); err != nil { // if command execution failed, try to reconnect
+			log.Errorf("Command failed: %v. Attempting to reconnect...", err)
+			//Reconnect(r.Client, ctx) // call the reconnect function
+			return err
+		}
+		return nil
+	}
+}
+
+// ProcessPipelineHook implements redis.Hook.
+func (r RedisHook) ProcessPipelineHook(next redis.ProcessPipelineHook) redis.ProcessPipelineHook {
+	return func(ctx context.Context, cmds []redis.Cmder) error {
+		return next(ctx, cmds)
+	}
+}
+func Reconnect(rdbPtr **redis.ClusterClient, ctx context.Context) {
+	for {
+		rdb := *rdbPtr                   // get the redis client from the pointer
+		_, err := rdb.Ping(ctx).Result() // try to ping the server
+		if err == nil {                  // if ping is successful, break the loop and return
+			log.Info("retry success")
+			return
+		}
+
+		log.Errorf("Failed to connect to Redis: %v. Retrying...\n", err) // if ping failed
+		options := redis.ClusterOptions{
+			Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
+			Password: os.Getenv("REDIS_PASSWORD"),
+		}
+		rdb = redis.NewClusterClient(&options) //reconnect to redis cluster
+		*rdbPtr = rdb                          // update the redis client pointer
+
+		select {
+		case <-ctx.Done(): // if the context is cancelled, stop the reconnection attempt
+			fmt.Println("Stopped reconnection attempt due to context cancellation")
+			return
+		case <-time.After(5 * time.Second): // wait for 5 seconds before the next reconnection attempt
+		}
+	}
+}
+```
+```go
+rdb := redis.NewClusterClient(&options)
+rdb.AddHook(RedisHook{Client: &rdb})
+```
+
 ### Solution 2: Implement Keepalive Heartbeat Mechanism in the Application Layer with Background Goroutine
 * Refer to the following article.
   * https://juejin.cn/post/6844903427097493517
