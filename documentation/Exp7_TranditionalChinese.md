@@ -45,7 +45,7 @@ func (r RedisHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 		next(ctx, cmd)
 		if err := cmd.Err(); err != nil { // if command execution failed, try to reconnect
 			log.Errorf("Command failed: %v. Attempting to reconnect...", err)
-			//Reconnect(r.Client, ctx) // call the reconnect function
+			Reconnect(r.Client, ctx) // call the reconnect function
 			return err
 		}
 		return nil
