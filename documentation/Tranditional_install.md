@@ -89,6 +89,7 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 - [不同的 redis 記憶體上限限制對於性能的影響](Exp5_TranditionalChinese.md)
 - [關於 redis connection pool timeout 的發生原因及解決方法探討](Exp6_TranditionalChinese.md)
 - [關於 redis EOF 的發生原因及解決方法探討](Exp7_TranditionalChinese.md)
+- [開啟實驗七中的 redis Hook 對於性能的影響](Exp8_TranditionalChinese.md)
 
 ## 參考資料
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------

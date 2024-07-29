@@ -93,6 +93,7 @@ eb672df8d3073c0327084123bda8f022216b239e 26.9.179.171:7005@17005 master - 0 1719
 - [The Impact of Different Redis Memory Limits on Performance](documentation/Exp5_English.md)
 - [Discussion on the Causes and Solutions of Redis Connection Pool Timeout](documentation/Exp6_English.md)
 - [Discussion on the Causes and Solutions of Redis EOF](documentation/Exp7_English.md)
+- [The Impact of Enabling Redis Hook on Performance in Experiment 7](documentation/Exp8_English.md)
 
 ## References
 1. https://pdai.tech/md/db/nosql-redis/db-redis-data-type-stream.html?source=post_page-----2a51f449343a--------------------------------
