@@ -331,7 +331,7 @@ func Consumer(log *logrus.Logger) {
 		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
 		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
 			err := ConsumingMessage(rdb, log)
-			if err == nil || err.Error() == "redis: nil" {
+			if err == nil {
 				break
 			} else {
 				if retry_cnt == Max_retry-1 {
