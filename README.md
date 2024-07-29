@@ -25,11 +25,15 @@ requirepass "your_redis_password"
 ### Create .env File in the Project Root Directory
 Example configuration:
 ```shell
-ip="your_device_ip"
-REDIS_PASSWORD="your_redis_password"  # Must match the password in rediscluster.conf
-STREAM_NAME="your_stream_name"
-CUSTOMER_GROUPNAME="your_customer_groupname"
-MaxEntries="maximum number of messages to be preloaded to control memory usage"
+REDIS_PASSWORD="The Redis database password you set yourself. It must match the one in rediscluster.conf."
+STREAM_NAME="The stream name used for message exchange."
+CUSTOMER_GROUPNAME="The group name for the customer."
+MaxEntries="The maximum number of messages pre-inserted to control memory usage."
+Publishing_message_num="The number of messages sent by the producer."
+Redis_Maxmemory="Used to control the --maxmemory parameter in the docker-compose file."
+REDIS_RECONNECT_PERIOD="The interval to wait before attempting to reconnect to Redis."
+REDIS_HOOK_ON="Whether to enable the Redis hook logic that implements reconnection."
+
 ```
 
 ### Start Redis Cluster and the Producer-Consumer Model

@@ -22,11 +22,14 @@ requirepass 「自行設定的 redis 資料庫密碼」
 ### 於專案根目錄中新增 .env 檔案
 範例
 ```shell
-ip=「你的設備 IP」
 REDIS_PASSWORD=「自行設定的 redis 資料庫密碼，要與 rediscluster.conf 一致」
 STREAM_NAME= 「用來交換訊息的 stream name」
 CUSTOMER_GROUPNAME=「customer 的 group name」
 MaxEntries=「預先置入的最大訊息數量，用於控制記憶體使用量」
+Publishing_message_num=「producer 送出的訊息數」
+Redis_Maxmemory=「用於控制 docker-compose file 中的 --maxmemory 參數」
+REDIS_RECONNECT_PERIOD=「用於控制 redis 再次 reconnect 前，等待的間隔」
+REDIS_HOOK_ON=「是否開啟實現 redis reconnect 邏輯的 redis hook」
 ```
 
 ### 啟動 Redis Cluster 以及 producer-consumer model

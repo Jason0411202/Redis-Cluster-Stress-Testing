@@ -117,11 +117,12 @@ func Reconnect(rdbPtr **redis.ClusterClient, ctx context.Context) {
 		rdb = redis.NewClusterClient(&options) //reconnect to redis cluster
 		*rdbPtr = rdb                          // update the redis client pointer
 
+		REDIS_RECONNECT_PERIOD, _ := strconv.Atoi(os.Getenv("REDIS_RECONNECT_PERIOD")) // wait for 5 seconds before the next reconnection attempt
 		select {
 		case <-ctx.Done(): // if the context is cancelled, stop the reconnection attempt
 			fmt.Println("Stopped reconnection attempt due to context cancellation")
 			return
-		case <-time.After(5 * time.Second): // wait for 5 seconds before the next reconnection attempt
+		case <-time.After(time.Duration(REDIS_RECONNECT_PERIOD) * time.Second): // wait for  seconds before the next reconnection attempt
 		}
 	}
 }
@@ -155,7 +156,11 @@ func Producer(log *logrus.Logger) {
 
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
-	rdb.AddHook(RedisHook{Client: &rdb})
+
+	REDIS_HOOK_ON, _ := strconv.Atoi(os.Getenv("REDIS_HOOK_ON"))
+	if REDIS_HOOK_ON == 1 {
+		rdb.AddHook(RedisHook{Client: &rdb})
+	}
 
 	Publishing_message_num, _ := strconv.Atoi(os.Getenv("Publishing_message_num"))
 	for i := 0; i < Publishing_message_num; i++ {
@@ -220,7 +225,11 @@ func AutoClaim(log *logrus.Logger) {
 
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
-	rdb.AddHook(RedisHook{Client: &rdb})
+
+	REDIS_HOOK_ON, _ := strconv.Atoi(os.Getenv("REDIS_HOOK_ON"))
+	if REDIS_HOOK_ON == 1 {
+		rdb.AddHook(RedisHook{Client: &rdb})
+	}
 
 	//Creating a consumer group, if exists, we can ignore the error
 	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "$").Result()
@@ -295,7 +304,11 @@ func Consumer(log *logrus.Logger) {
 
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
-	rdb.AddHook(RedisHook{Client: &rdb})
+
+	REDIS_HOOK_ON, _ := strconv.Atoi(os.Getenv("REDIS_HOOK_ON"))
+	if REDIS_HOOK_ON == 1 {
+		rdb.AddHook(RedisHook{Client: &rdb})
+	}
 
 	//Creating a consumer group, if exists, we can ignore the error
 	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "$").Result()
@@ -389,7 +402,11 @@ func main() {
 
 	//connect to redis cluster
 	rdb := redis.NewClusterClient(&options)
-	rdb.AddHook(RedisHook{Client: &rdb})
+
+	REDIS_HOOK_ON, _ := strconv.Atoi(os.Getenv("REDIS_HOOK_ON"))
+	if REDIS_HOOK_ON == 1 {
+		rdb.AddHook(RedisHook{Client: &rdb})
+	}
 
 	//check connection
 	pingResult, err := rdb.Ping(ctx).Result()
