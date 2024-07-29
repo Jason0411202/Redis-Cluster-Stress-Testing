@@ -292,6 +292,12 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 			if err != nil {
 				return err
 			}
+
+			Consuming_message_num++
+			if Consuming_message_num%10000 == 0 {
+				log.Infof("Consuming_message_num count: \"%d\"", Consuming_message_num)
+				log.Infof(("time elapsed: %s"), time.Since(start))
+			}
 		}
 	}
 
@@ -326,11 +332,6 @@ func Consumer(log *logrus.Logger) {
 	for {
 		if Consuming_message_num >= Publishing_message_num {
 			break
-		}
-		Consuming_message_num++
-		if Consuming_message_num%10000 == 0 {
-			log.Infof("Consuming_message_num count: \"%d\"", Consuming_message_num)
-			log.Infof(("time elapsed: %s"), time.Since(start))
 		}
 
 		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
