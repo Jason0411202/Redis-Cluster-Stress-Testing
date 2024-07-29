@@ -86,6 +86,7 @@ func (r RedisHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
 		next(ctx, cmd)
 		if err := cmd.Err(); err != nil { // if command execution failed, try to reconnect
+			log.Errorf("Failed command: %s %v", cmd.Name(), cmd.Args())
 			log.Errorf("Command failed: %v. Attempting to reconnect...", err)
 			Reconnect(r.Client, ctx) // call the reconnect function
 			return err
@@ -331,7 +332,7 @@ func Consumer(log *logrus.Logger) {
 		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
 		for retry_cnt := 0; retry_cnt < Max_retry; retry_cnt++ {
 			err := ConsumingMessage(rdb, log)
-			if err == nil {
+			if err == nil || err.Error() == "redis: nil" {
 				break
 			} else {
 				if retry_cnt == Max_retry-1 {
