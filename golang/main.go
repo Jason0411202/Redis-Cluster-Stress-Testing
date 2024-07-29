@@ -87,12 +87,13 @@ func (r RedisHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
 		next(ctx, cmd)
 
-		// if redis EOF
-		if err := cmd.Err(); strings.Contains(err.Error(), "EOF") {
-			log.Errorf("Failed command: %s %v", cmd.Name(), cmd.Args())
-			log.Errorf("Command failed: %v. Attempting to reconnect...", err)
-			Reconnect(r.Client, ctx) // call the reconnect function
-			return err
+		if err := cmd.Err(); err != nil {
+			if strings.Contains(err.Error(), "EOF") {
+				log.Errorf("Failed command: %s %v", cmd.Name(), cmd.Args())
+				log.Errorf("Command failed: %v. Attempting to reconnect...", err)
+				Reconnect(r.Client, ctx) // call the reconnect function
+				return err
+			}
 		}
 		return nil
 	}
