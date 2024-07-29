@@ -8,6 +8,7 @@ import (
 	"os"
 	"path/filepath"
 	"strconv"
+	"strings"
 	"time"
 
 	"github.com/redis/go-redis/v9"
@@ -85,7 +86,9 @@ func (r RedisHook) DialHook(next redis.DialHook) redis.DialHook {
 func (r RedisHook) ProcessHook(next redis.ProcessHook) redis.ProcessHook {
 	return func(ctx context.Context, cmd redis.Cmder) error {
 		next(ctx, cmd)
-		if err := cmd.Err(); err != nil { // if command execution failed, try to reconnect
+
+		// if redis EOF
+		if err := cmd.Err(); strings.Contains(err.Error(), "EOF") {
 			log.Errorf("Failed command: %s %v", cmd.Name(), cmd.Args())
 			log.Errorf("Command failed: %v. Attempting to reconnect...", err)
 			Reconnect(r.Client, ctx) // call the reconnect function
