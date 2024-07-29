@@ -153,6 +153,7 @@ func ProducingMessage(rdb *redis.ClusterClient, log *logrus.Logger, i int) (retu
 }
 
 func Producer(log *logrus.Logger) {
+	log.Info("producer start!")
 	//parameters for connecting to redis cluster
 	options := redis.ClusterOptions{
 		Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
@@ -168,7 +169,7 @@ func Producer(log *logrus.Logger) {
 	}
 
 	Publishing_message_num, _ := strconv.Atoi(os.Getenv("Publishing_message_num"))
-	for i := 0; i < Publishing_message_num; i++ {
+	for i := 1; i <= Publishing_message_num; i++ {
 		Max_retry, _ := strconv.Atoi(os.Getenv("Max_retry")) // retry 1000 times if failed
 		start := time.Now()                                  // calculate the time that retry takes when producing message
 		retry_flag := false
@@ -237,7 +238,7 @@ func AutoClaim(log *logrus.Logger) {
 	}
 
 	//Creating a consumer group, if exists, we can ignore the error
-	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "$").Result()
+	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "0").Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -307,6 +308,7 @@ func ConsumingMessage(rdb *redis.ClusterClient, log *logrus.Logger) (return_erro
 var Consuming_message_num = 0
 
 func Consumer(log *logrus.Logger) {
+	log.Info("consumer start!")
 	//parameters for connecting to redis cluster
 	options := redis.ClusterOptions{
 		Addrs:    []string{"redis-node1:7000", "redis-node2:7001", "redis-node3:7002", "redis-node4:7003", "redis-node5:7004", "redis-node6:7005"},
@@ -322,7 +324,7 @@ func Consumer(log *logrus.Logger) {
 	}
 
 	//Creating a consumer group, if exists, we can ignore the error
-	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "$").Result()
+	_, err := rdb.XGroupCreateMkStream(ctx, os.Getenv("STREAM_NAME"), os.Getenv("CUSTOMER_GROUPNAME"), "0").Result()
 	if err != nil {
 		log.Error(err)
 	}
@@ -393,8 +395,6 @@ var log *logrus.Logger
 
 func main() {
 	log = initLogger()
-	log.Info("producer start!")
-
 	// err := godotenv.Load(".env")
 	// if err != nil {
 	// 	log.Fatal("cnanot load .env file")
@@ -428,7 +428,9 @@ func main() {
 	start = time.Now()
 	go Producer(log)  // start producer
 	go AutoClaim(log) // start auto claim, auto claim will claim messages that have been idle for 300 seconds
-	Consumer(log)     // start consumer
+
+	time.Sleep(10 * time.Second) // wait for 5 seconds before starting the consumer
+	Consumer(log)                // start consumer
 	elapsed := time.Since(start)
 	log.Infof("All process finished in %s", elapsed)
 }
